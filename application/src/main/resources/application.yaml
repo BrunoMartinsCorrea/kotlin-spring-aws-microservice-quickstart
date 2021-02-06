@@ -1,0 +1,70 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet.context-path: /api/tribe/project
+
+management:
+  server:
+    port: ${MANAGEMENT_SERVER_PORT:8081}
+    servlet:
+      context-path: /
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+        exclude: env
+    jmx.exposure.include: health,info
+  endpoint:
+    prometheus.enabled: true
+    health.show-details: always
+    shutdown.enabled: false
+  info.git.mode: full
+  metrics.export.prometheus.enabled: true
+
+# ALL PROFILES
+spring:
+  profiles.active: ${SPRING_PROFILES_ACTIVE:local}
+  jackson.default-property-inclusion: non_null
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:testdb}
+    username: ${DB_USER:sa}
+    password: ${DB_PASS}
+    hikari:
+      connectionTimeout: ${DB_TIMEOUT:20000}
+      maximumPoolSize: ${DB_MAX_POOL_SIZE:5}
+--- # DEV & PROD PROFILES
+spring:
+  profiles: dev & prod
+  datasource:
+    driverClassName: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: false
+    show-sql: false
+    hibernate.ddl-auto: none
+    properties.hibernate:
+      format_sql: false
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      jdbc.lob.non_contextual_creation: true
+  h2.console.enabled: false
+--- # LOCAL PROFILE
+spring:
+  profiles: local
+  datasource:
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    generate-ddl: true
+    show-sql: true
+    hibernate.ddl-auto: create
+    properties.hibernate.format_sql: true
+  h2.console.enabled: true
+
+aws:
+  region: ${AWS_REGION:us-east-1}
+  s3:
+    access-key: ${AWS_S3_ACCESS_KEY:localstack}
+    secret-key: ${AWS_S3_SECRET_KEY:localstack}
+    bucket-name: ${AWS_S3_BUCKET_NAME:bucketname}
+    endpoint: ${AWS_S3_ENDPOINT:http://localhost:4566}
+    path-style-access-enabled: ${AWS_S3_PATH_STYLE_ACCESS_ENABLED:true}
